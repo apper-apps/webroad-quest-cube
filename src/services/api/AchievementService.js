@@ -242,9 +242,8 @@ class AchievementService {
       };
     } catch (error) {
       console.error(`Error fetching achievement with ID ${id}:`, error);
-      // Fall back to hardcoded achievement
+// Fall back to hardcoded achievement
       const achievement = this.achievements.find(a => a.Id === id);
-const achievement = this.achievements.find(a => a.Id === id);
       if (!achievement) {
         throw new Error('Achievement not found');
       }
