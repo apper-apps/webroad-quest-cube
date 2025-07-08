@@ -6,7 +6,7 @@ import StatusPill from '@/components/molecules/StatusPill'
 const TaskRow = ({ task, onClick, onStatusChange }) => {
   const statusCycle = { pending: 'working', working: 'complete', complete: 'pending' }
   
-  const handleStatusClick = (e) => {
+const handleStatusClick = (e) => {
     e.stopPropagation()
     const nextStatus = statusCycle[task.status]
     onStatusChange(task.id, nextStatus)
@@ -41,7 +41,7 @@ const TaskRow = ({ task, onClick, onStatusChange }) => {
               {format(new Date(task.dueDate), 'MMM d')}
             </div>
           )}
-          <StatusPill status={task.status} onClick={handleStatusClick} />
+<StatusPill status={task.status} onClick={handleStatusClick} />
           <ApperIcon name="ChevronRight" size={16} className="text-gray-400" />
         </div>
       </div>

@@ -83,8 +83,8 @@ class ProjectService {
         name: project.Name,
         description: project.description || '',
         createdAt: project.created_at || new Date().toISOString(),
-        tags: project.Tags || '',
-        tasks: this.generateTasksForProject(project.Id)
+tags: project.Tags || '',
+        tasks: await this.getTasksForProject(project.Id)
       }));
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -122,9 +122,9 @@ class ProjectService {
         Id: project.Id,
         name: project.Name,
         description: project.description || '',
-        createdAt: project.created_at || new Date().toISOString(),
+createdAt: project.created_at || new Date().toISOString(),
         tags: project.Tags || '',
-        tasks: this.generateTasksForProject(project.Id)
+        tasks: await this.getTasksForProject(project.Id)
       };
     } catch (error) {
       console.error(`Error fetching project with ID ${id}:`, error);
@@ -169,9 +169,9 @@ class ProjectService {
             Id: newProject.Id,
             name: newProject.Name,
             description: newProject.description || '',
-            createdAt: newProject.created_at || new Date().toISOString(),
+createdAt: newProject.created_at || new Date().toISOString(),
             tags: newProject.Tags || '',
-            tasks: this.generateTasksForProject(newProject.Id)
+            tasks: await this.getTasksForProject(newProject.Id)
           };
         }
       }
@@ -220,9 +220,9 @@ class ProjectService {
             Id: updatedProject.Id,
             name: updatedProject.Name,
             description: updatedProject.description || '',
-            createdAt: updatedProject.created_at || new Date().toISOString(),
+createdAt: updatedProject.created_at || new Date().toISOString(),
             tags: updatedProject.Tags || '',
-            tasks: this.generateTasksForProject(updatedProject.Id)
+            tasks: await this.getTasksForProject(updatedProject.Id)
           };
         }
       }
@@ -268,36 +268,23 @@ class ProjectService {
     }
   }
 
-  // Helper method to generate tasks for a project (mock implementation)
-  generateTasksForProject(projectId) {
-    return defaultTasks.map(task => ({
-      ...task,
-      assignedTo: '',
-      status: 'pending',
-      dueDate: null,
-      notes: ''
-    }));
-  }
-
-  // Task management methods (mock implementation as tasks are not in separate database table)
-  async updateTask(projectId, taskId, updates) {
-    // Mock implementation - in real app, tasks would be stored in database
-    const project = await this.getById(projectId);
-    if (!project) {
-      throw new Error('Project not found');
+// Helper method to fetch tasks for a project from TaskService
+  async getTasksForProject(projectId) {
+    try {
+      // Import TaskService dynamically to avoid circular dependencies
+      const TaskService = (await import('./TaskService')).default;
+      return await TaskService.getByProject(projectId);
+    } catch (error) {
+      console.error(`Error fetching tasks for project ${projectId}:`, error);
+      // Fallback to default tasks if TaskService fails
+      return defaultTasks.map(task => ({
+        ...task,
+        assignedTo: '',
+        status: 'pending',
+        dueDate: null,
+        notes: ''
+      }));
     }
-
-    const taskIndex = project.tasks.findIndex(t => t.id === taskId);
-    if (taskIndex === -1) {
-      throw new Error('Task not found');
-    }
-
-    project.tasks[taskIndex] = { ...project.tasks[taskIndex], ...updates };
-    return project;
-  }
-
-  async updateTaskStatus(projectId, taskId, status) {
-    return this.updateTask(projectId, taskId, { status });
   }
 }
 

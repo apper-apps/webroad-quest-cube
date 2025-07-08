@@ -1,28 +1,41 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { format } from 'date-fns'
+import { toast } from 'react-toastify'
 import ApperIcon from '@/components/ApperIcon'
 import Button from '@/components/atoms/Button'
 import Card from '@/components/atoms/Card'
 import FormField from '@/components/molecules/FormField'
 import StatusPill from '@/components/molecules/StatusPill'
+import TaskService from '@/services/api/TaskService'
 
 const TaskDetailModal = ({ task, onClose, onUpdate }) => {
-const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState({
     assignedTo: task.assigned_to || task.assignedTo || '',
     dueDate: task.due_date ? format(new Date(task.due_date), 'yyyy-MM-dd') : (task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : ''),
     notes: task.notes || ''
   })
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    const updates = {
-      ...formData,
-      dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : null
+    setLoading(true)
+    try {
+      const updates = {
+        assigned_to: formData.assignedTo,
+        due_date: formData.dueDate ? new Date(formData.dueDate).toISOString() : null,
+        notes: formData.notes
+      }
+      await TaskService.update(task.id, updates)
+      toast.success('Task updated successfully!')
+      onUpdate() // Call parent update to refresh data
+      onClose()
+    } catch (error) {
+      toast.error('Failed to update task')
+    } finally {
+      setLoading(false)
     }
-    onUpdate(task.id, updates)
   }
-
   const handleChange = (e) => {
     setFormData(prev => ({
       ...prev,
@@ -30,10 +43,16 @@ const [formData, setFormData] = useState({
     }))
   }
 
-  const handleStatusChange = (newStatus) => {
-    onUpdate(task.id, { status: newStatus })
+const handleStatusChange = async (newStatus) => {
+    try {
+      await TaskService.updateStatus(task.id, newStatus)
+      toast.success('Task status updated!')
+      onUpdate() // Call parent update to refresh data
+      onClose()
+    } catch (error) {
+      toast.error('Failed to update task status')
+    }
   }
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -92,13 +111,14 @@ const [formData, setFormData] = useState({
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+<form onSubmit={handleSubmit} className="space-y-4">
               <FormField
                 label="Assigned To"
                 name="assignedTo"
                 value={formData.assignedTo}
                 onChange={handleChange}
                 placeholder="Enter assignee name"
+                disabled={loading}
               />
               
               <FormField
@@ -107,6 +127,7 @@ const [formData, setFormData] = useState({
                 type="date"
                 value={formData.dueDate}
                 onChange={handleChange}
+                disabled={loading}
               />
 
               <div className="space-y-2">
@@ -116,7 +137,8 @@ const [formData, setFormData] = useState({
                   value={formData.notes}
                   onChange={handleChange}
                   placeholder="Add any notes or comments..."
-                  className="w-full h-24 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+                  disabled={loading}
+                  className="w-full h-24 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none disabled:opacity-50"
                 />
               </div>
 
@@ -127,15 +149,26 @@ const [formData, setFormData] = useState({
                   variant="secondary"
                   onClick={onClose}
                   className="flex-1"
+                  disabled={loading}
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   className="flex-1 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white"
+                  disabled={loading}
                 >
-                  <ApperIcon name="Save" size={18} className="mr-2" />
-                  Save Changes
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <ApperIcon name="Save" size={18} className="mr-2" />
+                      Save Changes
+                    </>
+                  )}
                 </Button>
               </div>
             </form>

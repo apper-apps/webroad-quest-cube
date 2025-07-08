@@ -14,7 +14,7 @@ import Loading from "@/components/ui/Loading";
 import LevelCard from "@/components/molecules/LevelCard";
 import AchievementService from "@/services/api/AchievementService";
 import ProjectService from "@/services/api/ProjectService";
-
+import TaskService from "@/services/api/TaskService";
 const ProjectDetail = () => {
   const { id } = useParams();
   const { isAuthenticated } = useSelector((state) => state.user);
@@ -39,27 +39,28 @@ const loadProject = async () => {
 useEffect(() => {
     loadProject();
   }, [id]);
-const handleTaskUpdate = async (taskId, updates) => {
+const handleTaskUpdate = async () => {
     try {
-      const updatedProject = await ProjectService.updateTask(parseInt(id), taskId, updates);
-      setProject(updatedProject);
+      // Refresh project data to get updated tasks
+      await loadProject();
       setSelectedTask(null);
-      toast.success('Task updated successfully!');
     } catch (err) {
-      toast.error('Failed to update task');
+      toast.error('Failed to refresh project data');
     }
   };
 const handleStatusChange = async (taskId, status) => {
     try {
-      const updatedProject = await ProjectService.updateTaskStatus(parseInt(id), taskId, status);
-      setProject(updatedProject);
+      await TaskService.updateStatus(taskId, status);
       toast.success('Task status updated!');
+      
+      // Refresh project data to get updated tasks
+      await loadProject();
       
       // Check for new achievements when task status changes
       if (status === 'complete') {
         const allProjects = await ProjectService.getAll();
         const newAchievements = await AchievementService.checkAchievements(allProjects);
-if (newAchievements.length > 0) {
+        if (newAchievements.length > 0) {
           setRecentAchievements(newAchievements);
           newAchievements.forEach(achievement => {
             toast.success(`🏆 Achievement Unlocked: ${achievement.name}!`);
