@@ -18,7 +18,6 @@ import ProjectService from "@/services/api/ProjectService";
 const ProjectDetail = () => {
   const { id } = useParams();
   const { isAuthenticated } = useSelector((state) => state.user);
-  const [project, setProject] = useState(null);
 const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -60,7 +59,6 @@ const handleStatusChange = async (taskId, status) => {
       if (status === 'complete') {
         const allProjects = await ProjectService.getAll();
         const newAchievements = await AchievementService.checkAchievements(allProjects);
-        if (newAchievements.length > 0) {
 if (newAchievements.length > 0) {
           setRecentAchievements(newAchievements);
           newAchievements.forEach(achievement => {
@@ -86,7 +84,6 @@ if (loading) return <Loading />;
 { number: 6, name: 'Off-page SEO & Backlinks', description: 'Social media setup and link building' }
   ];
 
-  const totalTasks = project.tasks.length;
 const totalTasks = project.tasks.length;
   const completedTasks = project.tasks.filter(t => t.status === 'complete').length;
   const overallProgress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
