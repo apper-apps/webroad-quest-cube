@@ -74,10 +74,10 @@ class ProjectService {
       
       if (!response.success) {
         console.error(response.message);
-        throw new Error(response.message);
+throw new Error(response.message);
       }
       
-// Transform data to match expected format and add tasks
+      // Transform data to match expected format and add tasks
       return (response.data || []).map(project => ({
         Id: project.Id,
         name: project.Name,
