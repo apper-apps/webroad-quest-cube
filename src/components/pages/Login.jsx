@@ -9,11 +9,24 @@ function Login() {
   const dispatch = useDispatch();
   const { isInitialized } = useContext(AuthContext);
   
-  useEffect(() => {
+useEffect(() => {
     if (isInitialized) {
-      // Show login UI in this component
-      const { ApperUI } = window.ApperSDK;
-      ApperUI.showLogin("#authentication");
+      // Add small delay to ensure DOM is stable before ApperUI initialization
+      setTimeout(() => {
+        try {
+          // Show login UI in this component
+          const { ApperUI } = window.ApperSDK;
+          ApperUI.showLogin("#authentication");
+        } catch (error) {
+          // Suppress harmless ResizeObserver loop errors
+          if (error.message && error.message.includes('ResizeObserver loop')) {
+            // This is a known harmless error that can be safely ignored
+            return;
+          }
+          // Re-throw other errors
+          throw error;
+        }
+      }, 100);
     }
   }, [isInitialized]);
   
