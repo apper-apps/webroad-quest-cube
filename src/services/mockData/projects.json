@@ -1,0 +1,280 @@
+[
+  {
+    "Id": 1,
+    "name": "E-commerce Website",
+    "description": "Building a modern e-commerce platform",
+    "createdAt": "2024-11-15T00:00:00Z",
+    "tasks": [
+      {
+        "id": 1,
+        "name": "Niche Research",
+        "assignedTo": "MySelf",
+        "status": "complete",
+        "dueDate": "2024-11-16T00:00:00Z",
+        "level": 1,
+        "notes": "Completed market research for e-commerce niche"
+      },
+      {
+        "id": 2,
+        "name": "Content Coverage",
+        "assignedTo": "Naveed Kalro",
+        "status": "working",
+        "dueDate": "2024-11-17T00:00:00Z",
+        "level": 1,
+        "notes": "Currently working on content strategy"
+      },
+      {
+        "id": 3,
+        "name": "Main Article Writing (100% Human Written)",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 1,
+        "notes": ""
+      },
+      {
+        "id": 4,
+        "name": "Other Articles Writing (100% Human Written)",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 1,
+        "notes": ""
+      },
+      {
+        "id": 5,
+        "name": "Pantheon WordPress Installation",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 2,
+        "notes": ""
+      },
+      {
+        "id": 6,
+        "name": "Discourage Search Engine",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 2,
+        "notes": ""
+      },
+      {
+        "id": 7,
+        "name": "Delete Existing Posts, Pages, Themes and Plugins",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 2,
+        "notes": ""
+      },
+      {
+        "id": 8,
+        "name": "Install Necessary Plugins and Themes",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 2,
+        "notes": ""
+      },
+      {
+        "id": 9,
+        "name": "Website Design - (Main Article + Header and Footer)",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 3,
+        "notes": ""
+      },
+      {
+        "id": 10,
+        "name": "Other Articles Designing",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 3,
+        "notes": ""
+      },
+      {
+        "id": 11,
+        "name": "Interlinking + External Linking",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 3,
+        "notes": ""
+      },
+      {
+        "id": 12,
+        "name": "Download Link Setup and Placement",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 3,
+        "notes": ""
+      },
+      {
+        "id": 13,
+        "name": "Legal Pages Creation",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 3,
+        "notes": ""
+      },
+      {
+        "id": 14,
+        "name": "Domain Purchase",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 4,
+        "notes": ""
+      },
+      {
+        "id": 15,
+        "name": "Hosting Purchase",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 4,
+        "notes": ""
+      },
+      {
+        "id": 16,
+        "name": "Gmail Create on Domain Name",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 4,
+        "notes": ""
+      },
+      {
+        "id": 17,
+        "name": "Cloudflare Setup",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 4,
+        "notes": ""
+      },
+      {
+        "id": 18,
+        "name": "WordPress Installation on Main Domain",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 4,
+        "notes": ""
+      },
+      {
+        "id": 19,
+        "name": "Migration Pantheon To Hosting & Uncheck Discourage Option ASAP",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 4,
+        "notes": ""
+      },
+      {
+        "id": 20,
+        "name": "RankMath SEO Settings",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 5,
+        "notes": ""
+      },
+      {
+        "id": 21,
+        "name": "Schema Settings",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 5,
+        "notes": ""
+      },
+      {
+        "id": 22,
+        "name": "Speed Optimization LiteSpeed + Perfmatters",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 5,
+        "notes": ""
+      },
+      {
+        "id": 23,
+        "name": "Enable Auto Update For All Plugins and Theme",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 5,
+        "notes": ""
+      },
+      {
+        "id": 24,
+        "name": "Serp inn Setup for Ranking Track",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 5,
+        "notes": ""
+      },
+      {
+        "id": 25,
+        "name": "Social Media Accounts Setup",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 6,
+        "notes": ""
+      },
+      {
+        "id": 26,
+        "name": "Social Sharing of All Posts",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 6,
+        "notes": ""
+      },
+      {
+        "id": 27,
+        "name": "Foundation Backlinks",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 6,
+        "notes": ""
+      },
+      {
+        "id": 28,
+        "name": "Nandla Strategy",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 6,
+        "notes": ""
+      },
+      {
+        "id": 29,
+        "name": "Competitor Analysis + Reverse Engineering",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 6,
+        "notes": ""
+      },
+      {
+        "id": 30,
+        "name": "Niche Edits + Guest Post Links",
+        "assignedTo": "",
+        "status": "pending",
+        "dueDate": null,
+        "level": 6,
+        "notes": ""
+      }
+    ]
+  }
+]
