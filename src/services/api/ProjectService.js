@@ -77,7 +77,7 @@ const response = await this.apperClient.fetchRecords(this.tableName, params);
         throw new Error(response.message);
       }
       
-      // Transform data to match expected format and add tasks
+// Transform data to match expected format and add tasks
       return (response.data || []).map(project => ({
         Id: project.Id,
         name: project.Name,
@@ -164,12 +164,12 @@ createdAt: project.created_at || new Date().toISOString(),
         }
         
         if (successfulRecords.length > 0) {
-          const newProject = successfulRecords[0].data;
+const newProject = successfulRecords[0].data;
           return {
             Id: newProject.Id,
             name: newProject.Name,
             description: newProject.description || '',
-createdAt: newProject.created_at || new Date().toISOString(),
+            createdAt: newProject.created_at || new Date().toISOString(),
             tags: newProject.Tags || '',
             tasks: await this.getTasksForProject(newProject.Id)
           };
@@ -215,12 +215,12 @@ createdAt: newProject.created_at || new Date().toISOString(),
         }
         
         if (successfulUpdates.length > 0) {
-          const updatedProject = successfulUpdates[0].data;
+const updatedProject = successfulUpdates[0].data;
           return {
             Id: updatedProject.Id,
             name: updatedProject.Name,
             description: updatedProject.description || '',
-createdAt: updatedProject.created_at || new Date().toISOString(),
+            createdAt: updatedProject.created_at || new Date().toISOString(),
             tags: updatedProject.Tags || '',
             tasks: await this.getTasksForProject(updatedProject.Id)
           };
