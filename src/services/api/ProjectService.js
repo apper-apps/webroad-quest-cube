@@ -30,7 +30,7 @@ const defaultTasks = [
   { id: 28, name: "Nandla Strategy", level: 6 },
   { id: 29, name: "Competitor Analysis + Reverse Engineering", level: 6 },
   { id: 30, name: "Niche Edits + Guest Post Links", level: 6 }
-]
+];
 
 class ProjectService {
   constructor() {
@@ -41,11 +41,16 @@ class ProjectService {
 
   initializeClient() {
     try {
-      const { ApperClient } = window.ApperSDK;
-      this.apperClient = new ApperClient({
-        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
-        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
-      });
+      // Ensure ApperSDK is available on the window object
+      if (window.ApperSDK) {
+        const { ApperClient } = window.ApperSDK;
+        this.apperClient = new ApperClient({
+          apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+          apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+        });
+      } else {
+        console.error('ApperSDK not found. Please ensure it is loaded.');
+      }
     } catch (error) {
       console.error('Failed to initialize ApperClient:', error);
     }
@@ -54,7 +59,7 @@ class ProjectService {
   async getAll() {
     try {
       if (!this.apperClient) this.initializeClient();
-      
+
       const params = {
         fields: [
           { field: { Name: "Name" } },
@@ -69,23 +74,31 @@ class ProjectService {
           }
         ]
       };
-      
-const response = await this.apperClient.fetchRecords(this.tableName, params);
-      
+
+      const response = await this.apperClient.fetchRecords(this.tableName, params);
+
       if (!response.success) {
         console.error(response.message);
         throw new Error(response.message);
       }
-      
-// Transform data to match expected format and add tasks
-      return (response.data || []).map(project => ({
-        Id: project.Id,
-        name: project.Name,
-        description: project.description || '',
-        createdAt: project.created_at || new Date().toISOString(),
-        tags: project.Tags || '',
-        tasks: await this.getTasksForProject(project.Id)
-      }));
+
+      // FIX: Use Promise.all to correctly handle asynchronous mapping.
+      // The original code used `await` inside a `map`, which returns an array of promises.
+      const projects = response.data || [];
+      const projectsWithTasksPromises = projects.map(async (project) => {
+        const tasks = await this.getTasksForProject(project.Id);
+        return {
+          Id: project.Id,
+          name: project.Name,
+          description: project.description || '',
+          createdAt: project.created_at || new Date().toISOString(),
+          tags: project.Tags || '',
+          tasks: tasks,
+        };
+      });
+
+      return await Promise.all(projectsWithTasksPromises);
+
     } catch (error) {
       console.error("Error fetching projects:", error);
       throw error;
@@ -95,7 +108,7 @@ const response = await this.apperClient.fetchRecords(this.tableName, params);
   async getById(id) {
     try {
       if (!this.apperClient) this.initializeClient();
-      
+
       const params = {
         fields: [
           { field: { Name: "Name" } },
@@ -104,25 +117,25 @@ const response = await this.apperClient.fetchRecords(this.tableName, params);
           { field: { Name: "Tags" } }
         ]
       };
-      
+
       const response = await this.apperClient.getRecordById(this.tableName, id, params);
-      
+
       if (!response.success) {
         console.error(response.message);
         throw new Error(response.message);
       }
-      
+
       if (!response.data) {
         throw new Error('Project not found');
       }
-      
+
       // Transform data to match expected format and add tasks
       const project = response.data;
       return {
         Id: project.Id,
         name: project.Name,
         description: project.description || '',
-createdAt: project.created_at || new Date().toISOString(),
+        createdAt: project.created_at || new Date().toISOString(),
         tags: project.Tags || '',
         tasks: await this.getTasksForProject(project.Id)
       };
@@ -135,7 +148,7 @@ createdAt: project.created_at || new Date().toISOString(),
   async create(projectData) {
     try {
       if (!this.apperClient) this.initializeClient();
-      
+
       const params = {
         records: [
           {
@@ -146,36 +159,47 @@ createdAt: project.created_at || new Date().toISOString(),
           }
         ]
       };
-      
+
       const response = await this.apperClient.createRecord(this.tableName, params);
-      
+
       if (!response.success) {
         console.error(response.message);
         throw new Error(response.message);
       }
-      
+
       if (response.results) {
         const successfulRecords = response.results.filter(result => result.success);
         const failedRecords = response.results.filter(result => !result.success);
-        
+
         if (failedRecords.length > 0) {
           console.error(`Failed to create ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
           throw new Error('Failed to create project');
         }
-        
+
         if (successfulRecords.length > 0) {
-const newProject = successfulRecords[0].data;
+          const newProject = successfulRecords[0].data;
+
+          // FIX: A new project should be initialized with the default tasks,
+          // not by fetching tasks that don't exist yet.
+          const tasks = defaultTasks.map(task => ({
+            ...task,
+            assignedTo: '',
+            status: 'pending',
+            dueDate: null,
+            notes: ''
+          }));
+
           return {
             Id: newProject.Id,
             name: newProject.Name,
             description: newProject.description || '',
             createdAt: newProject.created_at || new Date().toISOString(),
             tags: newProject.Tags || '',
-            tasks: await this.getTasksForProject(newProject.Id)
+            tasks: tasks
           };
         }
       }
-      
+
       throw new Error('No project was created');
     } catch (error) {
       console.error("Error creating project:", error);
@@ -186,7 +210,7 @@ const newProject = successfulRecords[0].data;
   async update(id, updates) {
     try {
       if (!this.apperClient) this.initializeClient();
-      
+
       const params = {
         records: [
           {
@@ -197,25 +221,25 @@ const newProject = successfulRecords[0].data;
           }
         ]
       };
-      
+
       const response = await this.apperClient.updateRecord(this.tableName, params);
-      
+
       if (!response.success) {
         console.error(response.message);
         throw new Error(response.message);
       }
-      
+
       if (response.results) {
         const successfulUpdates = response.results.filter(result => result.success);
         const failedUpdates = response.results.filter(result => !result.success);
-        
+
         if (failedUpdates.length > 0) {
           console.error(`Failed to update ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
           throw new Error('Failed to update project');
         }
-        
+
         if (successfulUpdates.length > 0) {
-const updatedProject = successfulUpdates[0].data;
+          const updatedProject = successfulUpdates[0].data;
           return {
             Id: updatedProject.Id,
             name: updatedProject.Name,
@@ -226,7 +250,7 @@ const updatedProject = successfulUpdates[0].data;
           };
         }
       }
-      
+
       throw new Error('No project was updated');
     } catch (error) {
       console.error("Error updating project:", error);
@@ -237,30 +261,30 @@ const updatedProject = successfulUpdates[0].data;
   async delete(id) {
     try {
       if (!this.apperClient) this.initializeClient();
-      
+
       const params = {
         RecordIds: [id]
       };
-      
+
       const response = await this.apperClient.deleteRecord(this.tableName, params);
-      
+
       if (!response.success) {
         console.error(response.message);
         throw new Error(response.message);
       }
-      
+
       if (response.results) {
         const successfulDeletions = response.results.filter(result => result.success);
         const failedDeletions = response.results.filter(result => !result.success);
-        
+
         if (failedDeletions.length > 0) {
           console.error(`Failed to delete ${failedDeletions.length} records:${JSON.stringify(failedDeletions)}`);
           throw new Error('Failed to delete project');
         }
-        
+
         return successfulDeletions.length > 0;
       }
-      
+
       return false;
     } catch (error) {
       console.error("Error deleting project:", error);
@@ -268,7 +292,7 @@ const updatedProject = successfulUpdates[0].data;
     }
   }
 
-// Helper method to fetch tasks for a project from TaskService
+  // Helper method to fetch tasks for a project from TaskService
   async getTasksForProject(projectId) {
     try {
       // Import TaskService dynamically to avoid circular dependencies
@@ -288,4 +312,4 @@ const updatedProject = successfulUpdates[0].data;
   }
 }
 
-export default new ProjectService()
+export default new ProjectService();
