@@ -160,6 +160,7 @@ if (loading) return <Loading />
 </div>
         </Card>
       </motion.div>
+      
       {/* Achievements Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -219,6 +220,129 @@ if (loading) return <Loading />
               </Card>
             </motion.div>
           ))}
+</div>
+      </motion.div>
+
+      {/* What do you want to do next? Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.6 }}
+        className="space-y-4"
+      >
+        <h2 className="text-2xl font-display text-gray-800">What do you want to do next?</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {projects.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="col-span-full"
+            >
+              <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20 p-6 text-center">
+                <div className="space-y-4">
+                  <div className="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mx-auto">
+                    <ApperIcon name="Rocket" size={24} className="text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Start Your First Quest!</h3>
+                    <p className="text-gray-600 mb-4">Begin your development journey by creating your first project.</p>
+                    <Button 
+                      onClick={() => setShowNewProjectModal(true)}
+                      className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white"
+                    >
+                      <ApperIcon name="Plus" size={16} className="mr-2" />
+                      Create Your First Project
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          ) : (
+            <>
+              {/* Continue working on active projects */}
+              {projects.filter(p => p.tasks.some(t => t.status === 'working')).slice(0, 2).map((project, index) => (
+                <motion.div
+                  key={`active-${project.Id}`}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                >
+                  <Card className="bg-gradient-to-r from-secondary/10 to-accent/10 border-secondary/20 p-4 hover:shadow-lg transition-all duration-200 cursor-pointer group">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-r from-secondary to-accent rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <ApperIcon name="Play" size={16} className="text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-800">Continue {project.Name}</h4>
+                        <p className="text-sm text-gray-600">
+                          {project.tasks.filter(t => t.status === 'working').length} active tasks
+                        </p>
+                      </div>
+                      <Link to={`/project/${project.Id}`}>
+                        <Button variant="outline" size="sm" className="border-secondary text-secondary hover:bg-secondary hover:text-white">
+                          Continue
+                        </Button>
+                      </Link>
+                    </div>
+                  </Card>
+                </motion.div>
+              ))}
+              
+              {/* Start new project */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
+              >
+                <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20 p-4 hover:shadow-lg transition-all duration-200 cursor-pointer group">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <ApperIcon name="Plus" size={16} className="text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-800">Start New Quest</h4>
+                      <p className="text-sm text-gray-600">Create another project to expand your skills</p>
+                    </div>
+                    <Button 
+                      onClick={() => setShowNewProjectModal(true)}
+                      variant="outline" 
+                      size="sm" 
+                      className="border-primary text-primary hover:bg-primary hover:text-white"
+                    >
+                      Create
+                    </Button>
+                  </div>
+                </Card>
+              </motion.div>
+
+              {/* Review completed achievements */}
+              {achievements.filter(a => a.isEarned).length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: 0.3 }}
+                >
+                  <Card className="bg-gradient-to-r from-accent/10 to-primary/10 border-accent/20 p-4 hover:shadow-lg transition-all duration-200 cursor-pointer group">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-r from-accent to-primary rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <ApperIcon name="Trophy" size={16} className="text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-800">Celebrate Progress</h4>
+                        <p className="text-sm text-gray-600">
+                          You've earned {achievements.filter(a => a.isEarned).length} achievements!
+                        </p>
+                      </div>
+                      <Button variant="outline" size="sm" className="border-accent text-accent hover:bg-accent hover:text-white">
+                        View All
+                      </Button>
+                    </div>
+                  </Card>
+                </motion.div>
+              )}
+            </>
+          )}
         </div>
       </motion.div>
 
@@ -226,7 +350,7 @@ if (loading) return <Loading />
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.6 }}
+        transition={{ duration: 0.6, delay: 0.8 }}
         className="space-y-4"
       >
         <div className="flex items-center justify-between">
