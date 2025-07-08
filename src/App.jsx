@@ -25,8 +25,22 @@ function App() {
   const userState = useSelector((state) => state.user);
   const isAuthenticated = userState?.isAuthenticated || false;
   
-  // Initialize ApperUI once when the app loads
+// Initialize ApperUI once when the app loads
   useEffect(() => {
+    // Global error handler to suppress harmless ResizeObserver errors
+    const handleGlobalError = (event) => {
+      if (event.message && event.message.includes('ResizeObserver loop')) {
+        // Suppress ResizeObserver loop errors as they are harmless
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+      }
+      return false;
+    };
+    
+    // Add global error listener
+    window.addEventListener('error', handleGlobalError);
+    
     const { ApperClient, ApperUI } = window.ApperSDK;
     
     const client = new ApperClient({
@@ -94,6 +108,11 @@ function App() {
         console.error("Authentication failed:", error);
       }
     });
+    
+    // Cleanup function to remove error listener
+    return () => {
+      window.removeEventListener('error', handleGlobalError);
+    };
   }, []);// No props and state should be bound
   
   // Authentication methods to share via context
