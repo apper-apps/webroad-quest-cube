@@ -1,97 +1,95 @@
-import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { toast } from 'react-toastify'
-import ProjectService from '@/services/api/ProjectService'
-import AchievementService from '@/services/api/AchievementService'
-import ApperIcon from '@/components/ApperIcon'
-import Button from '@/components/atoms/Button'
-import Badge from '@/components/atoms/Badge'
-import Card from '@/components/atoms/Card'
-import LevelCard from '@/components/molecules/LevelCard'
-import TaskDetailModal from '@/components/organisms/TaskDetailModal'
-import Loading from '@/components/ui/Loading'
-import Error from '@/components/ui/Error'
-import { format } from 'date-fns'
+import React, { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { format } from "date-fns";
+import ApperIcon from "@/components/ApperIcon";
+import TaskDetailModal from "@/components/organisms/TaskDetailModal";
+import Badge from "@/components/atoms/Badge";
+import Button from "@/components/atoms/Button";
+import Card from "@/components/atoms/Card";
+import Error from "@/components/ui/Error";
+import Loading from "@/components/ui/Loading";
+import LevelCard from "@/components/molecules/LevelCard";
+import AchievementService from "@/services/api/AchievementService";
+import ProjectService from "@/services/api/ProjectService";
 
 const ProjectDetail = () => {
-  const { id } = useParams()
-  const [project, setProject] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [selectedTask, setSelectedTask] = useState(null)
-  const [recentAchievements, setRecentAchievements] = useState([])
-
-  const loadProject = async () => {
+  const { id } = useParams();
+  const { isAuthenticated } = useSelector((state) => state.user);
+  const [project, setProject] = useState(null);
+const [project, setProject] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [recentAchievements, setRecentAchievements] = useState([]);
+const loadProject = async () => {
     try {
-      setLoading(true)
-      setError(null)
-      const data = await ProjectService.getById(parseInt(id))
-      setProject(data)
+      setLoading(true);
+      setError(null);
+      const data = await ProjectService.getById(parseInt(id));
+      setProject(data);
     } catch (err) {
-      setError(err.message)
-      toast.error('Failed to load project')
+      setError(err.message);
+      toast.error('Failed to load project');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
-
-  useEffect(() => {
-    loadProject()
-  }, [id])
-
-  const handleTaskUpdate = async (taskId, updates) => {
+  };
+useEffect(() => {
+    loadProject();
+  }, [id]);
+const handleTaskUpdate = async (taskId, updates) => {
     try {
-      const updatedProject = await ProjectService.updateTask(parseInt(id), taskId, updates)
-      setProject(updatedProject)
-      setSelectedTask(null)
-      toast.success('Task updated successfully!')
+      const updatedProject = await ProjectService.updateTask(parseInt(id), taskId, updates);
+      setProject(updatedProject);
+      setSelectedTask(null);
+      toast.success('Task updated successfully!');
     } catch (err) {
-      toast.error('Failed to update task')
+      toast.error('Failed to update task');
     }
-  }
-
+  };
 const handleStatusChange = async (taskId, status) => {
     try {
-      const updatedProject = await ProjectService.updateTaskStatus(parseInt(id), taskId, status)
-      setProject(updatedProject)
-      toast.success('Task status updated!')
+      const updatedProject = await ProjectService.updateTaskStatus(parseInt(id), taskId, status);
+      setProject(updatedProject);
+      toast.success('Task status updated!');
       
       // Check for new achievements when task status changes
       if (status === 'complete') {
-        const allProjects = await ProjectService.getAll()
-        const newAchievements = await AchievementService.checkAchievements(allProjects)
+        const allProjects = await ProjectService.getAll();
+        const newAchievements = await AchievementService.checkAchievements(allProjects);
         if (newAchievements.length > 0) {
-          setRecentAchievements(newAchievements)
+if (newAchievements.length > 0) {
+          setRecentAchievements(newAchievements);
           newAchievements.forEach(achievement => {
-            toast.success(`🏆 Achievement Unlocked: ${achievement.name}!`)
-          })
+            toast.success(`🏆 Achievement Unlocked: ${achievement.name}!`);
+          });
           // Clear recent achievements after 5 seconds
-          setTimeout(() => setRecentAchievements([]), 5000)
+          setTimeout(() => setRecentAchievements([]), 5000);
         }
       }
     } catch (err) {
-      toast.error('Failed to update task status')
+      toast.error('Failed to update task status');
     }
-  }
-
-  if (loading) return <Loading />
-  if (error) return <Error message={error} onRetry={loadProject} />
-  if (!project) return <Error message="Project not found" onRetry={loadProject} />
-
+  };
+if (loading) return <Loading />;
+  if (error) return <Error message={error} onRetry={loadProject} />;
+  if (!project) return <Error message="Project not found" onRetry={loadProject} />;
   const levels = [
     { number: 1, name: 'Research & Planning', description: 'Initial research and content strategy' },
     { number: 2, name: 'WordPress Setup', description: 'Initial WordPress configuration and setup' },
     { number: 3, name: 'Design & Content', description: 'Website design and content implementation' },
     { number: 4, name: 'Domain & Hosting', description: 'Domain setup and hosting configuration' },
     { number: 5, name: 'SEO & Performance', description: 'Search engine optimization and site performance' },
-    { number: 6, name: 'Off-page SEO & Backlinks', description: 'Social media setup and link building' }
-  ]
+{ number: 6, name: 'Off-page SEO & Backlinks', description: 'Social media setup and link building' }
+  ];
 
-const totalTasks = project.tasks.length
-  const completedTasks = project.tasks.filter(t => t.status === 'complete').length
-  const overallProgress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0
-
+  const totalTasks = project.tasks.length;
+const totalTasks = project.tasks.length;
+  const completedTasks = project.tasks.filter(t => t.status === 'complete').length;
+  const overallProgress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
   return (
     <div className="space-y-8">
       {/* Recent Achievements Celebration */}
@@ -144,11 +142,11 @@ const totalTasks = project.tasks.length
             <ApperIcon name="ArrowLeft" size={20} />
           </Link>
           <div className="flex-1">
-            <h1 className="text-3xl font-display bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+<h1 className="text-3xl font-display bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               {project.name}
             </h1>
             <p className="text-gray-600">
-              Created {format(new Date(project.createdAt), 'PPP')}
+              Created {project.createdAt ? format(new Date(project.createdAt), 'PPP') : 'Recently'}
             </p>
           </div>
         </div>
@@ -229,8 +227,8 @@ const totalTasks = project.tasks.length
           onUpdate={handleTaskUpdate}
         />
       )}
-    </div>
-  )
-}
+</div>
+  );
+};
 
-export default ProjectDetail
+export default ProjectDetail;

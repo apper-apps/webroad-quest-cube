@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { toast } from 'react-toastify'
 import ApperIcon from '@/components/ApperIcon'
 import Button from '@/components/atoms/Button'
 import Card from '@/components/atoms/Card'
@@ -10,11 +11,19 @@ const NewProjectModal = ({ onClose, onSubmit }) => {
     name: '',
     description: ''
   })
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (formData.name.trim()) {
-      onSubmit(formData)
+      setLoading(true)
+      try {
+        await onSubmit(formData)
+      } catch (error) {
+        toast.error('Failed to create project')
+      } finally {
+        setLoading(false)
+      }
     }
   }
 
@@ -101,12 +110,22 @@ const NewProjectModal = ({ onClose, onSubmit }) => {
                 >
                   Cancel
                 </Button>
-                <Button
+<Button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white"
+                  disabled={loading}
+                  className="flex-1 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white disabled:opacity-50"
                 >
-                  <ApperIcon name="Rocket" size={18} className="mr-2" />
-                  Create Project
+                  {loading ? (
+                    <>
+                      <ApperIcon name="Loader2" size={18} className="mr-2 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <ApperIcon name="Rocket" size={18} className="mr-2" />
+                      Create Project
+                    </>
+                  )}
                 </Button>
               </div>
             </form>

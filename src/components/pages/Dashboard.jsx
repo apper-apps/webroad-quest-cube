@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useSelector } from 'react-redux';
 import ApperIcon from "@/components/ApperIcon";
 import NewProjectModal from "@/components/organisms/NewProjectModal";
 import Badge from "@/components/atoms/Badge";
@@ -14,6 +15,7 @@ import ProjectCard from "@/components/molecules/ProjectCard";
 import AchievementService from "@/services/api/AchievementService";
 import ProjectService from "@/services/api/ProjectService";
 const Dashboard = () => {
+  const { isAuthenticated } = useSelector((state) => state.user)
   const [projects, setProjects] = useState([])
   const [achievements, setAchievements] = useState([])
   const [loading, setLoading] = useState(true)
@@ -75,8 +77,9 @@ const handleCreateProject = async (projectData) => {
     }
   }
 
-  if (loading) return <Loading />
+if (loading) return <Loading />
   if (error) return <Error message={error} onRetry={loadProjects} />
+  if (!isAuthenticated) return <Loading />
   if (projects.length === 0) return <Empty onAction={() => setShowNewProjectModal(true)} />
 
   return (

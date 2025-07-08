@@ -1,3 +1,5 @@
+import React from "react";
+import Error from "@/components/ui/Error";
 // Achievement definitions with unlocking criteria
 const achievements = [
   {
@@ -113,28 +115,142 @@ const achievements = [
 class AchievementService {
   constructor() {
     this.achievements = [...achievements]
+    this.tableName = 'achievement'
+    this.apperClient = null
     // Mock user achievement data - in real app this would come from user profile
     this.userAchievements = JSON.parse(localStorage.getItem('userAchievements') || '[]')
+    this.initializeClient()
   }
 
-  async delay(ms = 200) {
-    return new Promise(resolve => setTimeout(resolve, ms))
+  initializeClient() {
+    try {
+      const { ApperClient } = window.ApperSDK;
+      this.apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+    } catch (error) {
+      console.error('Failed to initialize ApperClient:', error);
+    }
   }
 
   async getAll() {
-    await this.delay()
-    return [...this.achievements]
+    try {
+      if (!this.apperClient) this.initializeClient();
+      
+      const params = {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "description" } },
+          { field: { Name: "icon" } },
+          { field: { Name: "variant" } },
+          { field: { Name: "category" } },
+          { field: { Name: "requirement_type" } },
+          { field: { Name: "requirement_count" } },
+          { field: { Name: "is_earned" } },
+          { field: { Name: "progress" } },
+          { field: { Name: "current_value" } },
+          { field: { Name: "target_value" } }
+        ]
+      };
+      
+      const response = await this.apperClient.fetchRecords(this.tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        // Fall back to hardcoded achievements if database is not available
+        return [...this.achievements];
+      }
+      
+      // Transform database data to match expected format
+      return (response.data || []).map(achievement => ({
+        Id: achievement.Id,
+        name: achievement.Name,
+        description: achievement.description,
+        icon: achievement.icon,
+        variant: achievement.variant,
+        category: achievement.category,
+        requirement: {
+          type: achievement.requirement_type,
+          count: achievement.requirement_count
+        },
+        isEarned: achievement.is_earned,
+        progress: achievement.progress,
+        currentValue: achievement.current_value,
+        targetValue: achievement.target_value
+      }));
+    } catch (error) {
+      console.error("Error fetching achievements:", error);
+      // Fall back to hardcoded achievements
+      return [...this.achievements];
+    }
   }
 
   async getById(id) {
-    await this.delay()
-    const achievement = this.achievements.find(a => a.Id === id)
-    if (!achievement) {
-      throw new Error('Achievement not found')
+    try {
+      if (!this.apperClient) this.initializeClient();
+      
+      const params = {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "description" } },
+          { field: { Name: "icon" } },
+          { field: { Name: "variant" } },
+          { field: { Name: "category" } },
+          { field: { Name: "requirement_type" } },
+          { field: { Name: "requirement_count" } },
+          { field: { Name: "is_earned" } },
+          { field: { Name: "progress" } },
+          { field: { Name: "current_value" } },
+          { field: { Name: "target_value" } }
+        ]
+      };
+      
+      const response = await this.apperClient.getRecordById(this.tableName, id, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        // Fall back to hardcoded achievement
+        const achievement = this.achievements.find(a => a.Id === id);
+        if (!achievement) {
+          throw new Error('Achievement not found');
+        }
+        return { ...achievement };
+      }
+      
+      if (!response.data) {
+        throw new Error('Achievement not found');
+      }
+      
+      // Transform database data to match expected format
+      const achievement = response.data;
+      return {
+        Id: achievement.Id,
+        name: achievement.Name,
+        description: achievement.description,
+        icon: achievement.icon,
+        variant: achievement.variant,
+        category: achievement.category,
+        requirement: {
+          type: achievement.requirement_type,
+          count: achievement.requirement_count
+        },
+        isEarned: achievement.is_earned,
+        progress: achievement.progress,
+        currentValue: achievement.current_value,
+        targetValue: achievement.target_value
+      };
+    } catch (error) {
+      console.error(`Error fetching achievement with ID ${id}:`, error);
+      // Fall back to hardcoded achievement
+      const achievement = this.achievements.find(a => a.Id === id);
+const achievement = this.achievements.find(a => a.Id === id);
+      if (!achievement) {
+        throw new Error('Achievement not found');
+      }
+      return { ...achievement };
     }
-    return { ...achievement }
   }
-
   async getEarnedAchievements() {
     await this.delay()
     return [...this.userAchievements]

@@ -8,9 +8,9 @@ import FormField from '@/components/molecules/FormField'
 import StatusPill from '@/components/molecules/StatusPill'
 
 const TaskDetailModal = ({ task, onClose, onUpdate }) => {
-  const [formData, setFormData] = useState({
-    assignedTo: task.assignedTo || '',
-    dueDate: task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : '',
+const [formData, setFormData] = useState({
+    assignedTo: task.assigned_to || task.assignedTo || '',
+    dueDate: task.due_date ? format(new Date(task.due_date), 'yyyy-MM-dd') : (task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : ''),
     notes: task.notes || ''
   })
 

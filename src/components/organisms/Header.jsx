@@ -1,8 +1,15 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { useContext } from 'react'
+import { useSelector } from 'react-redux'
 import ApperIcon from '@/components/ApperIcon'
+import Button from '@/components/atoms/Button'
+import { AuthContext } from '../../App'
 
 const Header = () => {
+  const { logout } = useContext(AuthContext);
+  const { user, isAuthenticated } = useSelector((state) => state.user);
+
   return (
     <motion.header 
       initial={{ y: -50, opacity: 0 }}
@@ -30,21 +37,28 @@ const Header = () => {
             </div>
           </Link>
           
-          <nav className="hidden md:flex items-center gap-6">
+<nav className="hidden md:flex items-center gap-6">
             <Link 
               to="/" 
               className="text-gray-700 hover:text-primary transition-colors duration-200 font-medium"
             >
               Dashboard
             </Link>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-gradient-to-r from-primary to-secondary text-white px-4 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-            >
-              <ApperIcon name="Plus" size={18} className="inline mr-2" />
-              New Project
-            </motion.button>
+            {isAuthenticated && (
+              <>
+                <span className="text-sm text-gray-600">
+                  Welcome, {user?.firstName || user?.name || 'User'}
+                </span>
+                <Button
+                  onClick={logout}
+                  variant="outline"
+                  className="border-error text-error hover:bg-error hover:text-white"
+                >
+                  <ApperIcon name="LogOut" size={18} className="mr-2" />
+                  Logout
+                </Button>
+              </>
+            )}
           </nav>
           
           <button className="md:hidden p-2 rounded-lg hover:bg-primary/10 transition-colors">

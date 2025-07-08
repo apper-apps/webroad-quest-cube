@@ -1,5 +1,3 @@
-import mockProjects from '@/services/mockData/projects.json'
-
 // Default task template for new projects
 const defaultTasks = [
   { id: 1, name: "Niche Research", level: 1 },
@@ -36,91 +34,270 @@ const defaultTasks = [
 
 class ProjectService {
   constructor() {
-    this.projects = [...mockProjects]
+    this.tableName = 'project'
+    this.apperClient = null
+    this.initializeClient()
   }
 
-  async delay(ms = 300) {
-    return new Promise(resolve => setTimeout(resolve, ms))
+  initializeClient() {
+    try {
+      const { ApperClient } = window.ApperSDK;
+      this.apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+    } catch (error) {
+      console.error('Failed to initialize ApperClient:', error);
+    }
   }
 
   async getAll() {
-    await this.delay()
-    return [...this.projects]
+    try {
+      if (!this.apperClient) this.initializeClient();
+      
+      const params = {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "description" } },
+          { field: { Name: "created_at" } },
+          { field: { Name: "Tags" } }
+        ],
+        orderBy: [
+          {
+            fieldName: "created_at",
+            sorttype: "DESC"
+          }
+        ]
+      };
+      
+      const response = await this.apperClient.fetchRecords(this.tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      // Transform data to match expected format and add tasks
+      return (response.data || []).map(project => ({
+        Id: project.Id,
+        name: project.Name,
+        description: project.description || '',
+        createdAt: project.created_at || new Date().toISOString(),
+        tags: project.Tags || '',
+        tasks: this.generateTasksForProject(project.Id)
+      }));
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      throw error;
+    }
   }
 
   async getById(id) {
-    await this.delay()
-    const project = this.projects.find(p => p.Id === id)
-    if (!project) {
-      throw new Error('Project not found')
+    try {
+      if (!this.apperClient) this.initializeClient();
+      
+      const params = {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "description" } },
+          { field: { Name: "created_at" } },
+          { field: { Name: "Tags" } }
+        ]
+      };
+      
+      const response = await this.apperClient.getRecordById(this.tableName, id, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      if (!response.data) {
+        throw new Error('Project not found');
+      }
+      
+      // Transform data to match expected format and add tasks
+      const project = response.data;
+      return {
+        Id: project.Id,
+        name: project.Name,
+        description: project.description || '',
+        createdAt: project.created_at || new Date().toISOString(),
+        tags: project.Tags || '',
+        tasks: this.generateTasksForProject(project.Id)
+      };
+    } catch (error) {
+      console.error(`Error fetching project with ID ${id}:`, error);
+      throw error;
     }
-    return { ...project }
   }
 
   async create(projectData) {
-    await this.delay()
-    const newId = Math.max(...this.projects.map(p => p.Id), 0) + 1
-    
-    const tasks = defaultTasks.map(task => ({
+    try {
+      if (!this.apperClient) this.initializeClient();
+      
+      const params = {
+        records: [
+          {
+            Name: projectData.name,
+            description: projectData.description || '',
+            created_at: new Date().toISOString(),
+            Tags: projectData.tags || ''
+          }
+        ]
+      };
+      
+      const response = await this.apperClient.createRecord(this.tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      if (response.results) {
+        const successfulRecords = response.results.filter(result => result.success);
+        const failedRecords = response.results.filter(result => !result.success);
+        
+        if (failedRecords.length > 0) {
+          console.error(`Failed to create ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          throw new Error('Failed to create project');
+        }
+        
+        if (successfulRecords.length > 0) {
+          const newProject = successfulRecords[0].data;
+          return {
+            Id: newProject.Id,
+            name: newProject.Name,
+            description: newProject.description || '',
+            createdAt: newProject.created_at || new Date().toISOString(),
+            tags: newProject.Tags || '',
+            tasks: this.generateTasksForProject(newProject.Id)
+          };
+        }
+      }
+      
+      throw new Error('No project was created');
+    } catch (error) {
+      console.error("Error creating project:", error);
+      throw error;
+    }
+  }
+
+  async update(id, updates) {
+    try {
+      if (!this.apperClient) this.initializeClient();
+      
+      const params = {
+        records: [
+          {
+            Id: id,
+            Name: updates.name,
+            description: updates.description,
+            Tags: updates.tags
+          }
+        ]
+      };
+      
+      const response = await this.apperClient.updateRecord(this.tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      if (response.results) {
+        const successfulUpdates = response.results.filter(result => result.success);
+        const failedUpdates = response.results.filter(result => !result.success);
+        
+        if (failedUpdates.length > 0) {
+          console.error(`Failed to update ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
+          throw new Error('Failed to update project');
+        }
+        
+        if (successfulUpdates.length > 0) {
+          const updatedProject = successfulUpdates[0].data;
+          return {
+            Id: updatedProject.Id,
+            name: updatedProject.Name,
+            description: updatedProject.description || '',
+            createdAt: updatedProject.created_at || new Date().toISOString(),
+            tags: updatedProject.Tags || '',
+            tasks: this.generateTasksForProject(updatedProject.Id)
+          };
+        }
+      }
+      
+      throw new Error('No project was updated');
+    } catch (error) {
+      console.error("Error updating project:", error);
+      throw error;
+    }
+  }
+
+  async delete(id) {
+    try {
+      if (!this.apperClient) this.initializeClient();
+      
+      const params = {
+        RecordIds: [id]
+      };
+      
+      const response = await this.apperClient.deleteRecord(this.tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      if (response.results) {
+        const successfulDeletions = response.results.filter(result => result.success);
+        const failedDeletions = response.results.filter(result => !result.success);
+        
+        if (failedDeletions.length > 0) {
+          console.error(`Failed to delete ${failedDeletions.length} records:${JSON.stringify(failedDeletions)}`);
+          throw new Error('Failed to delete project');
+        }
+        
+        return successfulDeletions.length > 0;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      throw error;
+    }
+  }
+
+  // Helper method to generate tasks for a project (mock implementation)
+  generateTasksForProject(projectId) {
+    return defaultTasks.map(task => ({
       ...task,
       assignedTo: '',
       status: 'pending',
       dueDate: null,
       notes: ''
-    }))
-
-    const newProject = {
-      Id: newId,
-      name: projectData.name,
-      description: projectData.description || '',
-      createdAt: new Date().toISOString(),
-      tasks
-    }
-
-    this.projects.push(newProject)
-    return { ...newProject }
+    }));
   }
 
-  async update(id, updates) {
-    await this.delay()
-    const index = this.projects.findIndex(p => p.Id === id)
-    if (index === -1) {
-      throw new Error('Project not found')
-    }
-
-    this.projects[index] = { ...this.projects[index], ...updates }
-    return { ...this.projects[index] }
-  }
-
-  async delete(id) {
-    await this.delay()
-    const index = this.projects.findIndex(p => p.Id === id)
-    if (index === -1) {
-      throw new Error('Project not found')
-    }
-
-    this.projects.splice(index, 1)
-    return true
-  }
-
+  // Task management methods (mock implementation as tasks are not in separate database table)
   async updateTask(projectId, taskId, updates) {
-    await this.delay()
-    const project = this.projects.find(p => p.Id === projectId)
+    // Mock implementation - in real app, tasks would be stored in database
+    const project = await this.getById(projectId);
     if (!project) {
-      throw new Error('Project not found')
+      throw new Error('Project not found');
     }
 
-    const taskIndex = project.tasks.findIndex(t => t.id === taskId)
+    const taskIndex = project.tasks.findIndex(t => t.id === taskId);
     if (taskIndex === -1) {
-      throw new Error('Task not found')
+      throw new Error('Task not found');
     }
 
-    project.tasks[taskIndex] = { ...project.tasks[taskIndex], ...updates }
-    return { ...project }
+    project.tasks[taskIndex] = { ...project.tasks[taskIndex], ...updates };
+    return project;
   }
 
   async updateTaskStatus(projectId, taskId, status) {
-    return this.updateTask(projectId, taskId, { status })
+    return this.updateTask(projectId, taskId, { status });
   }
 }
 

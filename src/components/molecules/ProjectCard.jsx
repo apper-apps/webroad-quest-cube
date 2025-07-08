@@ -24,8 +24,8 @@ const ProjectCard = ({ project, onDelete }) => {
             <h3 className="text-lg font-semibold text-gray-800 group-hover:text-primary transition-colors">
               {project.name}
             </h3>
-            <p className="text-sm text-gray-500">
-              {format(new Date(project.createdAt), 'MMM d, yyyy')}
+<p className="text-sm text-gray-500">
+              {project.createdAt ? format(new Date(project.createdAt), 'MMM d, yyyy') : 'Recently'}
             </p>
           </div>
           <div className="flex items-center gap-2">
