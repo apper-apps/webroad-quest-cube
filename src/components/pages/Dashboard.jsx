@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import AchievementService from "@/services/api/AchievementService";
 import ApperIcon from "@/components/ApperIcon";
 import NewProjectModal from "@/components/organisms/NewProjectModal";
 import Badge from "@/components/atoms/Badge";
@@ -12,8 +11,8 @@ import Empty from "@/components/ui/Empty";
 import Error from "@/components/ui/Error";
 import Loading from "@/components/ui/Loading";
 import ProjectCard from "@/components/molecules/ProjectCard";
+import AchievementService from "@/services/api/AchievementService";
 import ProjectService from "@/services/api/ProjectService";
-
 const Dashboard = () => {
   const [projects, setProjects] = useState([])
   const [achievements, setAchievements] = useState([])
@@ -155,13 +154,11 @@ const handleCreateProject = async (projectData) => {
               </p>
               <p className="text-gray-600">Levels Completed</p>
             </div>
-          </div>
+</div>
         </Card>
       </motion.div>
-</motion.div>
-
       {/* Achievements Section */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.4 }}
@@ -254,8 +251,9 @@ const handleCreateProject = async (projectData) => {
                 onDelete={handleDeleteProject}
               />
             </motion.div>
-          ))}
+))}
         </div>
+      </motion.div>
 
       {/* New Project Modal */}
       {showNewProjectModal && (
