@@ -77,13 +77,13 @@ class ProjectService {
         throw new Error(response.message);
       }
       
-      // Transform data to match expected format and add tasks
+// Transform data to match expected format and add tasks
       return (response.data || []).map(project => ({
         Id: project.Id,
         name: project.Name,
         description: project.description || '',
         createdAt: project.created_at || new Date().toISOString(),
-tags: project.Tags || '',
+        tags: project.Tags || '',
         tasks: await this.getTasksForProject(project.Id)
       }));
     } catch (error) {
