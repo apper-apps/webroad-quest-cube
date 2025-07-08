@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import ApperIcon from '@/components/ApperIcon'
+import Badge from '@/components/atoms/Badge'
 import Card from '@/components/atoms/Card'
 import StatusPill from '@/components/molecules/StatusPill'
 import TaskRow from '@/components/molecules/TaskRow'
@@ -37,14 +38,19 @@ const LevelCard = ({ level, tasks, onTaskClick, onStatusChange }) => {
           </div>
         </div>
         
-        {isLevelComplete && (
+{isLevelComplete && (
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
-            className="bg-success/20 p-2 rounded-full"
+            className="flex items-center gap-2"
           >
-            <ApperIcon name="Trophy" size={20} className="text-success" />
+            <div className="bg-success/20 p-2 rounded-full">
+              <ApperIcon name="Trophy" size={20} className="text-success" />
+            </div>
+            <Badge variant="gold" icon="Crown">
+              Level Complete
+            </Badge>
           </motion.div>
         )}
       </div>
@@ -53,11 +59,6 @@ const LevelCard = ({ level, tasks, onTaskClick, onStatusChange }) => {
       <div className="space-y-2 mb-6">
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-600">Level Progress</span>
-          <span className="font-semibold text-primary">
-            {completedTasks}/{totalTasks} tasks
-          </span>
-        </div>
-        <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
           <motion.div
             className={`bg-gradient-to-r ${levelColors[level.number]} h-full rounded-full`}
             initial={{ width: 0 }}

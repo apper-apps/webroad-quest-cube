@@ -3,8 +3,10 @@ import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { toast } from 'react-toastify'
 import ProjectService from '@/services/api/ProjectService'
+import AchievementService from '@/services/api/AchievementService'
 import ApperIcon from '@/components/ApperIcon'
 import Button from '@/components/atoms/Button'
+import Badge from '@/components/atoms/Badge'
 import Card from '@/components/atoms/Card'
 import LevelCard from '@/components/molecules/LevelCard'
 import TaskDetailModal from '@/components/organisms/TaskDetailModal'
@@ -18,6 +20,7 @@ const ProjectDetail = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedTask, setSelectedTask] = useState(null)
+  const [recentAchievements, setRecentAchievements] = useState([])
 
   const loadProject = async () => {
     try {
@@ -48,11 +51,25 @@ const ProjectDetail = () => {
     }
   }
 
-  const handleStatusChange = async (taskId, status) => {
+const handleStatusChange = async (taskId, status) => {
     try {
       const updatedProject = await ProjectService.updateTaskStatus(parseInt(id), taskId, status)
       setProject(updatedProject)
       toast.success('Task status updated!')
+      
+      // Check for new achievements when task status changes
+      if (status === 'complete') {
+        const allProjects = await ProjectService.getAll()
+        const newAchievements = await AchievementService.checkAchievements(allProjects)
+        if (newAchievements.length > 0) {
+          setRecentAchievements(newAchievements)
+          newAchievements.forEach(achievement => {
+            toast.success(`🏆 Achievement Unlocked: ${achievement.name}!`)
+          })
+          // Clear recent achievements after 5 seconds
+          setTimeout(() => setRecentAchievements([]), 5000)
+        }
+      }
     } catch (err) {
       toast.error('Failed to update task status')
     }
@@ -71,12 +88,47 @@ const ProjectDetail = () => {
     { number: 6, name: 'Off-page SEO & Backlinks', description: 'Social media setup and link building' }
   ]
 
-  const totalTasks = project.tasks.length
+const totalTasks = project.tasks.length
   const completedTasks = project.tasks.filter(t => t.status === 'complete').length
   const overallProgress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0
 
   return (
     <div className="space-y-8">
+      {/* Recent Achievements Celebration */}
+      {recentAchievements.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8, y: -20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.8, y: -20 }}
+          className="fixed top-4 right-4 z-50 space-y-2"
+        >
+          {recentAchievements.map((achievement) => (
+            <motion.div
+              key={achievement.Id}
+              initial={{ x: 300 }}
+              animate={{ x: 0 }}
+              exit={{ x: 300 }}
+              className="bg-white rounded-lg shadow-lg border-2 border-primary/20 p-4 max-w-sm"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-full ${
+                  achievement.variant === 'bronze' ? 'bg-gradient-to-r from-amber-600 to-amber-700'
+                    : achievement.variant === 'silver' ? 'bg-gradient-to-r from-gray-400 to-gray-500'
+                    : achievement.variant === 'gold' ? 'bg-gradient-to-r from-yellow-400 to-yellow-500'
+                    : 'bg-gradient-to-r from-cyan-400 to-blue-500'
+                }`}>
+                  <ApperIcon name={achievement.icon} size={20} className="text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-sm text-gray-800">Achievement Unlocked!</p>
+                  <p className="text-xs text-gray-600">{achievement.name}</p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
+
       {/* Project Header */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
