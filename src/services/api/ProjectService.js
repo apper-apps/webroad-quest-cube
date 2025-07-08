@@ -70,11 +70,11 @@ class ProjectService {
         ]
       };
       
-      const response = await this.apperClient.fetchRecords(this.tableName, params);
+const response = await this.apperClient.fetchRecords(this.tableName, params);
       
       if (!response.success) {
         console.error(response.message);
-throw new Error(response.message);
+        throw new Error(response.message);
       }
       
       // Transform data to match expected format and add tasks
